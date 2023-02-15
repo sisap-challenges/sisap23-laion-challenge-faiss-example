@@ -43,6 +43,7 @@ jobs:
           conda create -n faiss python=3.8
           conda activate faiss
           conda install -c pytorch faiss-cpu==1.7.0
+          pip install h5py
       - name: Run benchmark
         shell: bash -el {0}
         run: |

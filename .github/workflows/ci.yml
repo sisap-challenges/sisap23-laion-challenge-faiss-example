@@ -29,6 +29,8 @@ jobs:
         python-version: ["3.8"]
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
       - name: Set up Python 3.8
         uses: actions/setup-python@v4
         with:
@@ -52,5 +54,5 @@ jobs:
           python3 eval/eval.py
       - uses: actions/upload-artifact@v3
         with:
-          name: my-artifact
+          name: result on 100k
           path: res.csv

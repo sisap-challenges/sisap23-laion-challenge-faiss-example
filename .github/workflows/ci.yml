@@ -32,8 +32,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.8'
-      - run: |
-        python3 --version
+      - name: check python version
+        run: |
+          python3 --version
       - name: Install dependencies
         run: |
           $CONDA/bin/conda install -c pytorch faiss-cpu==1.7.0

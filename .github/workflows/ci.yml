@@ -45,4 +45,5 @@ jobs:
           conda install -c pytorch faiss-cpu==1.7.0
       - name: Run benchmark
         run: |
+          conda activate faiss
           python3 search/search.py

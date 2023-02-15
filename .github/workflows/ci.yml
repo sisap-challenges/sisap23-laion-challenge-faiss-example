@@ -38,8 +38,8 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
+        shell: bash -el {0}
         run: |
-          conda init bash
           conda create -n faiss python=3.8
           conda activate faiss
           conda install -c pytorch faiss-cpu==1.7.0

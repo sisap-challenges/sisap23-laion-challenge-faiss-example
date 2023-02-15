@@ -38,7 +38,6 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           auto-activate-base: true
-          activate-environment: ""
       - name: check python version
         run: |
           which python3

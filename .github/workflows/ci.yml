@@ -49,3 +49,8 @@ jobs:
         run: |
           conda activate faiss
           python3 search/search.py
+          python3 eval/eval.py
+      - uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: res.csv

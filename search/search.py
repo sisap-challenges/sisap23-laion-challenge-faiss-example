@@ -12,36 +12,37 @@ def download(src, dst):
         print('downloading %s -> %s...' % (src, dst))
         urlretrieve(src, dst)
 
-def prepare(kind):
+def prepare(kind, size):
     url = "http://ingeotec.mx/~sadit/metric-datasets/LAION/SISAP23-Challenge"
 
     task = {
         "query": f"{url}/{kind}/en-queries/public-queries-10k-{kind}.h5",
-        "dataset": f"{url}/{kind}/en-bundles/laion2B-en-{kind}-n=100K.h5",
-        # "groundtruth": f"{url}/public-queries/en-gold-standard-public/small-laion2B-en-public-gold-standard-100K.h5",
+        "dataset": f"{url}/{kind}/en-bundles/laion2B-en-{kind}-n={size}.h5",
     }
 
     for version, url in task.items():
-        download(url, os.path.join("data", kind, f"{version}.h5"))
+        download(url, os.path.join("data", kind, size, f"{version}.h5"))
 
-def store_results(dst, kind, D, I, buildtime, querytime, params):
+def store_results(dst, algo, kind, D, I, buildtime, querytime, params, size):
     os.makedirs(Path(dst).parent, exist_ok=True)
     f = h5py.File(dst, 'w')
-    f.attrs['kind'] = kind
-    f.attrs['build'] = buildtime
+    f.attrs['algo'] = algo
+    f.attrs['data'] = kind
+    f.attrs['buildtime'] = buildtime
     f.attrs['querytime'] = querytime
+    f.attrs['size'] = size
     f.attrs['params'] = params
     f.create_dataset('knns', I.shape, dtype=I.dtype)[:] = I
     f.create_dataset('dists', D.shape, dtype=D.dtype)[:] = D
     f.close()
 
-def run(kind, k=30):
+def run(kind, size="100K", k=30):
     print("Running", kind)
     
-    prepare(kind)
+    prepare(kind, size)
 
-    data = np.array(h5py.File(os.path.join("data", kind, "dataset.h5"), "r")[kind])
-    queries = np.array(h5py.File(os.path.join("data", kind, "query.h5"), "r")[kind])
+    data = np.array(h5py.File(os.path.join("data", kind, size, "dataset.h5"), "r")[kind])
+    queries = np.array(h5py.File(os.path.join("data", kind, size, "query.h5"), "r")[kind])
     n, d = data.shape
 
     nlist = 128 # number of clusters/centroids to build the IVF from
@@ -62,10 +63,12 @@ def run(kind, k=30):
     print(f"Training index on {data.shape}")
     start = time.time()
     index.train(data)
+    index.add(data)
     elapsed_build = time.time() - start
     print(f"Done training in {elapsed_build}s.")
+    assert index.is_trained
 
-    for nprobe in [1, 2, 5, 10, 50]:
+    for nprobe in [1, 2, 5, 10, 20, 50, 100]:
         print(f"Starting search on {queries.shape} with nprobe={nprobe}")
         start = time.time()
         index.nprobe = nprobe
@@ -73,9 +76,9 @@ def run(kind, k=30):
         elapsed_search = time.time() - start
         print(f"Done searching in {elapsed_search}s.")
 
-        identifier = f"index=({index_identifier}), query=(nprobe={nprobe})"
+        identifier = f"index=({index_identifier}),query=(nprobe={nprobe})"
 
-        store_results(os.path.join("result/", kind, f"{identifier}.h5"), kind, D, I, elapsed_build, elapsed_search, identifier)
+        store_results(os.path.join("result/", kind, size, f"{identifier}.h5"), "faissIVF", kind, D, I, elapsed_build, elapsed_search, identifier, size)
 
 if __name__ == "__main__":
     run("pca32")

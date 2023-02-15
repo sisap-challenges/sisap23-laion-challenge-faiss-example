@@ -41,10 +41,11 @@ jobs:
         run: |
           which python3
           python3 --version
+          which conda
       - name: Install dependencies
         run: |
-          $CONDA/bin/conda install -c pytorch faiss-cpu==1.7.0
-          $CONDA/bin/pip install h5py
+          conda install -c pytorch faiss-cpu==1.7.0
+          pip install h5py
       - name: Run benchmark
         run: |
           python3 search/search.py

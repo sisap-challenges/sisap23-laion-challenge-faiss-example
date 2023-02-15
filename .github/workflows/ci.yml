@@ -34,7 +34,7 @@ jobs:
           python-version: '3.8'
       - name: check python version
         run: |
-          python3 --version
+          $CONDA/bin/python3 --version
       - name: Install dependencies
         run: |
           $CONDA/bin/conda install -c pytorch faiss-cpu==1.7.0

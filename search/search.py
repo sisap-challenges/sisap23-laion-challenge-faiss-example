@@ -40,8 +40,8 @@ def run(kind, k=30):
     
     prepare(kind)
 
-    data = h5py.File(os.path.join("data", kind, "dataset.h5"), "r")[kind]
-    queries = h5py.File(os.path.join("data", kind, "query.h5"), "r")[kind]
+    data = np.array(h5py.File(os.path.join("data", kind, "dataset.h5"), "r")[kind])
+    queries = np.array(h5py.File(os.path.join("data", kind, "query.h5"), "r")[kind])
     n, d = data.shape
 
     nlist = 128 # number of clusters/centroids to build the IVF from

@@ -43,8 +43,10 @@ jobs:
           which python3
           python3 --version
           which conda
+          conda info
       - name: Install dependencies
         run: |
+          conda activate test
           conda install -c pytorch faiss-cpu==1.7.0
           pip install h5py
       - name: Run benchmark

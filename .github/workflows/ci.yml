@@ -12,7 +12,7 @@ on:
 
 jobs:
   test:
-    name: Python ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    name: ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -34,7 +34,8 @@ jobs:
           python-version: 3.8
       - name: Install dependencies
         run: |
-          $CONDA/bin/conda install -c pytorch faiss-cpu numpy h5py
+          $CONDA/bin/conda install -c pytorch faiss-cpu
+          $CONDA/bin/pip install h5py
       - name: Run benchmark
         run: |
           python3 search/search.py

@@ -94,7 +94,6 @@ if __name__ == "__main__":
         "--k",
         default=30,
     )
-    parser.add_argument("csvfile", default="res.csv")
 
     args = parser.parse_args()
 

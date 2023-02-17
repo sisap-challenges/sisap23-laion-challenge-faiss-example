@@ -1,3 +1,4 @@
+import argparse
 import faiss
 import h5py
 import numpy as np
@@ -76,11 +77,29 @@ def run(kind, size="100K", k=30):
         elapsed_search = time.time() - start
         print(f"Done searching in {elapsed_search}s.")
 
+        I = I + 1 # FAISS is 0-indexed, groundtruth is 1-indexed
+
         identifier = f"index=({index_identifier}),query=(nprobe={nprobe})"
 
         store_results(os.path.join("result/", kind, size, f"{identifier}.h5"), "faissIVF", kind, D, I, elapsed_build, elapsed_search, identifier, size)
 
 if __name__ == "__main__":
-    run("pca32")
-    run("pca96")
-    run("hamming")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--size",
+        default="100K"
+    )
+    parser.add_argument(
+        "--k",
+        default=30,
+    )
+    parser.add_argument("csvfile", default="res.csv")
+
+    args = parser.parse_args()
+
+    assert args.size in ["100K", "300K", "10M", "30M", "100M"]
+
+    run("pca32", args.size, args.k)
+    run("pca96", args.size, args.k)
+    run("hamming", args.size, args.k)

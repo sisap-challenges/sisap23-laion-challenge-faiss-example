@@ -52,6 +52,7 @@ jobs:
           conda activate faiss
           python3 search/search.py
           python3 eval/eval.py
+          python3 eval/plot.py
       - uses: actions/upload-artifact@v3
         with:
           name: Results on 100k

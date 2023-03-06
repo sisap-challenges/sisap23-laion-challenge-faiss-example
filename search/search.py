@@ -48,10 +48,10 @@ def run(kind, key, size="100K", k=30):
 
     nlist = 128 # number of clusters/centroids to build the IVF from
 
-    if kind.startswith("pca"):
+    if kind.startswith("pca") || kind == "clip768":
         index_identifier = f"IVF{nlist},Flat"
         index = faiss.index_factory(d, index_identifier)
-    elif kind == "hamming":
+    elif kind.startswith("hamming"):
         index_identifier = f"BIVF{nlist},Flat" # use binary IVF index
         d = 64 * d # one chunk contains 64 bits
         index = faiss.index_binary_factory(d, index_identifier)
@@ -102,3 +102,4 @@ if __name__ == "__main__":
     run("pca32v2", "pca32", args.size, args.k)
     run("pca96v2", "pca96", args.size, args.k)
     run("hammingv2", "hamming", args.size, args.k)
+    run("clip768", "emb", args.size, args.k)

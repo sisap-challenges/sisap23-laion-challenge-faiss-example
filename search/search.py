@@ -14,11 +14,11 @@ def download(src, dst):
         urlretrieve(src, dst)
 
 def prepare(kind, size):
-    url = "https://sisap-23-challenge.s3.amazonaws.com/SISAP23-Challenge"
-
+    # url = "https://sisap-23-challenge.s3.amazonaws.com/SISAP23-Challenge"
+    url = "http://ingeotec.mx/~sadit/metric-datasets/LAION/SISAP23-Challenge"
     task = {
-        "query": f"{url}/{kind}/en-queries/public-queries-10k-{kind}.h5",
-        "dataset": f"{url}/{kind}/en-bundles/laion2B-en-{kind}-n={size}.h5",
+        "query": f"{url}/public-queries-10k-{kind}.h5",
+        "dataset": f"{url}/laion2B-en-{kind}-n={size}.h5",
     }
 
     for version, url in task.items():
@@ -37,18 +37,18 @@ def store_results(dst, algo, kind, D, I, buildtime, querytime, params, size):
     f.create_dataset('dists', D.shape, dtype=D.dtype)[:] = D
     f.close()
 
-def run(kind, size="100K", k=30):
+def run(kind, key, size="100K", k=30):
     print("Running", kind)
     
     prepare(kind, size)
 
-    data = np.array(h5py.File(os.path.join("data", kind, size, "dataset.h5"), "r")[kind])
-    queries = np.array(h5py.File(os.path.join("data", kind, size, "query.h5"), "r")[kind])
+    data = np.array(h5py.File(os.path.join("data", kind, size, "dataset.h5"), "r")[key])
+    queries = np.array(h5py.File(os.path.join("data", kind, size, "query.h5"), "r")[key])
     n, d = data.shape
 
     nlist = 128 # number of clusters/centroids to build the IVF from
 
-    if kind == "pca32" or kind == "pca96":
+    if kind.startswith("pca"):
         index_identifier = f"IVF{nlist},Flat"
         index = faiss.index_factory(d, index_identifier)
     elif kind == "hamming":
@@ -99,6 +99,6 @@ if __name__ == "__main__":
 
     assert args.size in ["100K", "300K", "10M", "30M", "100M"]
 
-    run("pca32", args.size, args.k)
-    run("pca96", args.size, args.k)
-    run("hamming", args.size, args.k)
+    run("pca32v2", "pca32", args.size, args.k)
+    run("pca96v2", "pca96", args.size, args.k)
+    run("hammingv2", "hamming", args.size, args.k)

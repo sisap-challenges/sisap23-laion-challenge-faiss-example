@@ -48,7 +48,7 @@ def run(kind, key, size="100K", k=30):
 
     nlist = 128 # number of clusters/centroids to build the IVF from
 
-    if kind.startswith("pca") || kind == "clip768":
+    if kind.startswith("pca") or kind == "clip768":
         index_identifier = f"IVF{nlist},Flat"
         index = faiss.index_factory(d, index_identifier)
     elif kind.startswith("hamming"):

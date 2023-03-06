@@ -48,7 +48,7 @@ def run(kind, key, size="100K", k=30):
 
     nlist = 128 # number of clusters/centroids to build the IVF from
 
-    if kind.startswith("pca") or kind == "clip768":
+    if kind.startswith("pca"):
         index_identifier = f"IVF{nlist},Flat"
         index = faiss.index_factory(d, index_identifier)
     elif kind.startswith("hamming"):
@@ -59,6 +59,10 @@ def run(kind, key, size="100K", k=30):
         data = np.array(data).view(dtype="uint8")
         queries = np.array(queries).view(dtype="uint8")
     else:
+        # if kind == "clip768":
+        # convert vectors from float16 to float32 
+        # normalize vectors
+        # dot product / angle as distance (1-cosine) 
         raise Exception(f"unsupported input type {kind}")
 
     print(f"Training index on {data.shape}")
@@ -102,4 +106,3 @@ if __name__ == "__main__":
     run("pca32v2", "pca32", args.size, args.k)
     run("pca96v2", "pca96", args.size, args.k)
     run("hammingv2", "hamming", args.size, args.k)
-    run("clip768", "emb", args.size, args.k)

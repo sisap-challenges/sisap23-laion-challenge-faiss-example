@@ -59,4 +59,4 @@ jobs:
           name: Results on 100k
           path: | 
             res.csv
-            result_100k.png
+            result_100K.png

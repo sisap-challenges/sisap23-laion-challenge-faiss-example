@@ -14,8 +14,8 @@ def download(src, dst):
         urlretrieve(src, dst)
 
 def prepare(kind, size):
-    # url = "https://sisap-23-challenge.s3.amazonaws.com/SISAP23-Challenge"
-    url = "http://ingeotec.mx/~sadit/metric-datasets/LAION/SISAP23-Challenge"
+    url = "https://sisap-23-challenge.s3.amazonaws.com/SISAP23-Challenge"
+    #url = "http://ingeotec.mx/~sadit/metric-datasets/LAION/SISAP23-Challenge"
     task = {
         "query": f"{url}/public-queries-10k-{kind}.h5",
         "dataset": f"{url}/laion2B-en-{kind}-n={size}.h5",

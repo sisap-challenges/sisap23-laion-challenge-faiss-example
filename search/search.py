@@ -3,7 +3,7 @@ import faiss
 import h5py
 import numpy as np
 from sklearn import preprocessing
-import os
+import os, sys
 from pathlib import Path
 from urllib.request import urlretrieve
 import time
@@ -29,9 +29,10 @@ def prepare(kind, size):
 
 
 def load_clip768(dbname, key):
+    print(f"loading {dbname}[{key}]")
     with h5py.File(dbname, 'r') as f:
         X = np.array(f[key], dtype=np.float32)
-        X = preprocessing.normalize(X, norm='l2')
+        X = preprocessing.normalize(X, norm='l2', copy=False)
 
     return X
 
@@ -50,11 +51,30 @@ def store_results(dst, algo, kind, D, I, buildtime, querytime, params, size):
     f.close()
 
 
-def create_hnsw(X, nsize, dim, neighborhoodsize, efConstruction):
+def create_hnsw(data, neighborhoodsize, efConstruction):
     starttime = time.time()
+    print(f"creating HNSW index")
+    n, dim = data.shape
+    print((n, dim))
     index = faiss.IndexHNSWFlat(dim, neighborhoodsize, faiss.METRIC_INNER_PRODUCT)
     index.hnsw.efConstruction = efConstruction
-    index.add(X)
+    bs = 100000
+    sp = 0
+    ep = min(bs, n)
+
+    N = 0
+    while sp < n:
+        X = np.array(data[sp:ep, :], dtype=np.float32)
+        X = preprocessing.normalize(X, norm="l2")
+        index.add(X)
+        N += X.shape[0]
+        sp = ep # + 1
+        ep = min(sp + bs, n)
+        print((sp, ep, dim, n))
+
+    print((N, n))
+    assert N == n
+    print(f"HNSW done ", (index.ntotal, n))
     buildtime = time.time() - starttime
     name = f"faiss HSNW d={dim} M={neighborhoodsize} efC={efConstruction}"
     mem = 0  # avoids saving the index for now
@@ -64,13 +84,19 @@ def create_hnsw(X, nsize, dim, neighborhoodsize, efConstruction):
 def run_hsnw(kind, key, size, k=30):
     print("Running", kind)
     prepare(kind, size)
+    print("loading data")
+    if size == "100M":
+        m = 32
+    else:
+        m = 32
 
     datafile = os.path.join("data", kind, size, "dataset.h5")
     queriesfile = os.path.join("data", kind, size, "query.h5")
-    data = load_clip768(datafile, key)
+    # data = load_clip768(datafile, key, preprocess)
+    h5data = h5py.File(datafile, "r")
+    index, name, mem, buildtime = create_hnsw(h5data[key], m, 40)
+    h5data.close()
     queries = load_clip768(queriesfile, key)
-    n, d = data.shape
-    index, name, mem, buildtime = create_hnsw(data, n, d, 32, 500)
     assert index.is_trained
 
     for efSearch in [32, 64, 128, 256, 512]:

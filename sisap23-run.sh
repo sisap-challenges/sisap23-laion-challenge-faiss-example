@@ -1,3 +1,6 @@
 #! /bin/bash
 
-JULIA_NUM_THREADS=auto JULIA_PROJECT=. julia src/run.jl "$@"
+for s in $@
+do
+  conda run -n faiss python -u search/search.py --size $s  
+done
